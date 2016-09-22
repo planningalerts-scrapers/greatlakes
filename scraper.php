@@ -1,6 +1,6 @@
 <?php
 # Great Lakes Council scraper - ePathway
-require 'scraperwiki.php'; 
+require 'scraperwiki.php';
 require 'simple_html_dom.php';
 date_default_timezone_set('Australia/Sydney');
 
@@ -48,7 +48,7 @@ $user_agent = "User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) PlanningAlerts.org
 $da_page = $url_base . "EnquirySummaryView.aspx";
 $comment_base = "mailto:council@greatlakes.nsw.gov.au?subject=";
 
-$cookies = accept_terms_get_cookies($term_url, "Next", array('mDataGrid:Column0:Property' => 'ctl00$MainBodyContent$mDataList$ctl01$mDataGrid$ctl03$ctl00'));
+$cookies = accept_terms_get_cookies($term_url, "Next", array('mDataGrid:Column0:Property' => 'ctl00$MainBodyContent$mDataList$ctl02$mDataGrid$ctl03$ctl00'));
 
 # Manually set cookie's key and get the value from array
 $request = array(
@@ -69,7 +69,7 @@ foreach ($dataset as $record) {
     $date_received = explode('/', $date_received[0]);
     $date_received = "$date_received[2]-$date_received[1]-$date_received[0]";
     $date_received = date('Y-m-d', strtotime($date_received));
-    
+
     $address   = preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 1)->plaintext)));
     $address   = explode(",", $address, 2);
     $address   = trim($address[1]) . ", Australia";
