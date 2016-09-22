@@ -72,7 +72,7 @@ foreach ($dataset as $record) {
 
     $address   = preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 1)->plaintext)));
     $address   = explode(",", $address, 2);
-    $address   = trim($address[1]) . ", Australia";
+    $address   = trim($address[1]);
 
     # Put all information in an array
     $application = array (
