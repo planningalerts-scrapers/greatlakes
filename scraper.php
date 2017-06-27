@@ -1,99 +1,85 @@
 <?php
 # Great Lakes Council scraper - ePathway
-require 'scraperwiki.php';
-require 'simple_html_dom.php';
+require_once 'vendor/autoload.php';
+require_once 'vendor/openaustralia/scraperwiki/scraperwiki.php';
+
+use PGuardiario\PGBrowser;
+use Sunra\PhpSimple\HtmlDomParser;
+
 date_default_timezone_set('Australia/Sydney');
 
-## Accept Terms and return Cookies
-function accept_terms_get_cookies($terms_url, $button='Next', $postfields=array('mDataGrid:Column0:Property'=>'ctl00$MainBodyContent$mDataList$ctl01$mDataGrid$ctl02$ctl00')) {
-    $dom = file_get_html($terms_url);
 
-    foreach ($dom->find('input[type=hidden]') as $data) {
-        $postfields = array_merge($postfields, array($data->name => $data->value));
-    }
-    foreach ($dom->find("input[value=$button]") as $data) {
-        $postfields = array_merge($postfields, array($data->name => $data->value));
-    }
-
-    $curl = curl_init($terms_url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_POST, 1);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $postfields);
-    curl_setopt($curl, CURLOPT_HEADER, TRUE);
-    $terms_response = curl_exec($curl);
-    curl_close($curl);
-    // get cookie
-    // Please imporve it, I am not regex expert, this code changed ASP.NET_SessionId cookie
-    // to ASP_NET_SessionId and Path, HttpOnly are missing etc
-    // Example Source - Cookie: ASP.NET_SessionId=bz3jprrptbflxgzwes3mtse4; path=/; HttpOnly
-    // Stored in array - ASP_NET_SessionId => bz3jprrptbflxgzwes3mtse4
-    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $terms_response, $matches);
-    $cookies = array();
-    foreach($matches[1] as $item) {
-        parse_str($item, $cookie);
-        $cookies = array_merge($cookies, $cookie);
-    }
-    return $cookies;
-}
-
-
-###
-### Main code start here
-###
-$url_base = "https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/";
 $term_url = "https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx";
-$user_agent = "User-Agent:Mozilla/5.0 (Windows NT 6.1; WOW64) PlanningAlerts.org.au";
-
-$da_page = $url_base . "EnquirySummaryView.aspx";
 $comment_base = "mailto:council@greatlakes.nsw.gov.au?subject=";
 
-$cookies = accept_terms_get_cookies($term_url, "Next", array('mDataGrid:Column0:Property' => 'ctl00$MainBodyContent$mDataList$ctl02$mDataGrid$ctl03$ctl00'));
+# Agreed Terms
+$browser = new PGBrowser();
+$page = $browser->get($term_url);
+$form = $page->form();
+$form->set('mDataGrid:Column0:Property', 'ctl00$MainBodyContent$mDataList$ctl03$mDataGrid$ctl02$ctl00');
+$form->set('ctl00$MainBodyContent$mContinueButton', 'Next');
+$page = $form->submit();
 
-# Manually set cookie's key and get the value from array
-$request = array(
-    'http'    => array(
-    'header'  => "Cookie: ASP.NET_SessionId=" .$cookies['ASP_NET_SessionId']. "; path=/; HttpOnly\r\n".
-                 "$user_agent\r\n"
-    ));
-$context = stream_context_create($request);
-$dom = file_get_html($da_page, false, $context);
+# Click Search will show all DAs
+$form = $page->form();
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mEnquiryListsDropDownList', '55');
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mTabControl$ctl04$mStreetNumberTextBox', '');
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mTabControl$ctl04$mStreetNameTextBox', '');
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mTabControl$ctl04$mStreetTypeDropDown', '(any)');
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mTabControl$ctl04$mSuburbTextBox', '');
+$form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mSearchButton', 'Search');
+$page = $form->submit();
 
-# Assume it is single page, the web site doesn't allow to select period like last month
-$dataset  = $dom->find("tr[class=ContentPanel], tr[class=AlternateContentPanel]");
+$dom = HtmlDomParser::str_get_html($page->html);
+$pages = $dom->find("span[id=ctl00_MainBodyContent_mPagingControl_pageNumberLabel]", 0);
+$pages = explode(" ", $pages->innertext);
+$pages = $pages[3];
+if ($pages > 10) {
+    $pages = 10;
+} else {
+    $pages = 1;
+}
 
-# The usual, look for the data set and if needed, save it
-foreach ($dataset as $record) {
-    # Slow way to transform the date but it works
-    $date_received = explode(' ', (trim($record->find('span',0)->plaintext)), 2);
-    $date_received = explode('/', $date_received[0]);
-    $date_received = "$date_received[2]-$date_received[1]-$date_received[0]";
-    $date_received = date('Y-m-d', strtotime($date_received));
+for ($i=1; $i<=$pages; $i++) {
+    echo "Scraping page $i of $pages\n";
+    $page = $browser->get("https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquirySummaryView.aspx?PageNumber=$i");
+    $dom = HtmlDomParser::str_get_html($page->html);
+    $dataset  = $dom->find("tr[class=ContentPanel], tr[class=AlternateContentPanel]");
 
-    $address   = preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 1)->plaintext)));
-    $address   = explode(",", $address, 2);
-    $address   = trim($address[1]);
+    # The usual, look for the data set and if needed, save it
+    foreach ($dataset as $record) {
+        # Slow way to transform the date but it works
+        $date_received = explode(' ', (trim($record->find('span',0)->plaintext)), 2);
+        $date_received = explode('/', $date_received[0]);
+        $date_received = "$date_received[2]-$date_received[1]-$date_received[0]";
+        $date_received = date('Y-m-d', strtotime($date_received));
 
-    # Put all information in an array
-    $application = array (
-        'council_reference' => trim(html_entity_decode($record->find('a',0)->plaintext)),
-        'address'           => $address,
-        'description'       => preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 4)->plaintext))),
-        'info_url'          => $term_url,
-        'comment_url'       => $comment_base . trim($record->find('a',0)->plaintext),
-        'date_scraped'      => date('Y-m-d'),
-        'date_received'     => $date_received
-    );
+        $address   = preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 1)->plaintext)));
+        $address   = explode(",", $address, 2);
+        $address   = trim($address[1]);
 
-    # Check if record exist, if not, INSERT, else do nothing
-    $existingRecords = scraperwiki::select("* from data where `council_reference`='" . $application['council_reference'] . "'");
-    if ((count($existingRecords) == 0) && ($application['council_reference'] !== 'Not on file')) {
-        print ("Saving record " . $application['council_reference'] . "\n");
-        # print_r ($application);
-        scraperwiki::save(array('council_reference'), $application);
-    } else {
-        print ("Skipping already saved record or ignore corrupted data - " . $application['council_reference'] . "\n");
+        # Put all information in an array
+        $application = array (
+            'council_reference' => trim(html_entity_decode($record->find('a',0)->plaintext)),
+            'address'           => $address,
+            'description'       => preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 4)->plaintext))),
+            'info_url'          => $term_url,
+            'comment_url'       => $comment_base . trim($record->find('a',0)->plaintext),
+            'date_scraped'      => date('Y-m-d'),
+            'date_received'     => $date_received
+        );
+
+        # Check if record exist, if not, INSERT, else do nothing
+        $existingRecords = scraperwiki::select("* from data where `council_reference`='" . $application['council_reference'] . "'");
+        if ((count($existingRecords) == 0) && ($application['council_reference'] !== 'Not on file')) {
+            print ("Saving record " . $application['council_reference'] . " - " . $application['address']. "\n");
+//             print_r ($application);
+            scraperwiki::save(['council_reference'], $application);
+        } else {
+            print ("Skipping already saved record - " . $application['council_reference'] . "\n");
+        }
     }
+
 }
 
 
