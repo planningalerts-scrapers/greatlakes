@@ -4,7 +4,7 @@ require_once 'vendor/autoload.php';
 require_once 'vendor/openaustralia/scraperwiki/scraperwiki.php';
 
 use PGuardiario\PGBrowser;
-use Sunra\PhpSimple\HtmlDomParser;
+use Torann\DomParser\HtmlDom;
 
 date_default_timezone_set('Australia/Sydney');
 
@@ -30,7 +30,7 @@ $form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mTabControl$ctl04
 $form->set('ctl00$MainBodyContent$mGeneralEnquirySearchControl$mSearchButton', 'Search');
 $page = $form->submit();
 
-$dom = HtmlDomParser::str_get_html($page->html);
+$dom = HtmlDom::fromString($page->html);
 $pages = $dom->find("span[id=ctl00_MainBodyContent_mPagingControl_pageNumberLabel]", 0);
 $pages = explode(" ", $pages->innertext);
 $pages = $pages[3];
@@ -43,7 +43,7 @@ if ($pages > 10) {
 for ($i=1; $i<=$pages; $i++) {
     echo "Scraping page $i of $pages\n";
     $page = $browser->get("https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquirySummaryView.aspx?PageNumber=$i");
-    $dom = HtmlDomParser::str_get_html($page->html);
+    $dom = HtmlDom::fromString($page->html);
     $dataset  = $dom->find("tr[class=ContentPanel], tr[class=AlternateContentPanel]");
 
     # The usual, look for the data set and if needed, save it
