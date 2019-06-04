@@ -9,8 +9,7 @@ use Sunra\PhpSimple\HtmlDomParser;
 date_default_timezone_set('Australia/Sydney');
 
 
-$term_url = "https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx";
-$comment_base = "mailto:council@greatlakes.nsw.gov.au?subject=";
+$term_url = "https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP";
 
 # Agreed Terms
 $browser = new PGBrowser();
@@ -64,7 +63,6 @@ for ($i=1; $i<=$pages; $i++) {
             'address'           => $address,
             'description'       => preg_replace('/\s+/', ' ', trim(html_entity_decode($record->find('span', 4)->plaintext))),
             'info_url'          => $term_url,
-            'comment_url'       => $comment_base . trim($record->find('a',0)->plaintext),
             'date_scraped'      => date('Y-m-d'),
             'date_received'     => $date_received
         );
