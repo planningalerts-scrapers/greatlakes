@@ -1,6 +1,2 @@
 # Ignore output of scraper
 data.sqlite
-vendor
-
-results_original.yml
-results_ruby.yml
