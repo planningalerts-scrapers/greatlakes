@@ -6,5 +6,7 @@ EpathwayScraper.scrape(
 ) do |record|
   # Remove the first bit of the address as it just contains lot information
   record["address"] = record["address"].split(", ")[1..-1].join(", ")
+  # Squeeze whitespace
+  record["address"] = record["address"].squeeze(" ")
   EpathwayScraper.save(record)
 end
