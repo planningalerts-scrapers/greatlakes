@@ -7,7 +7,8 @@ puts "Running original scraper..."
 system("php scraper.php")
 
 results_original = ScraperWiki.select("* from data order by council_reference")
-
+# it looks like php scraperwiki library throws in an id. Ignore that.
+results_original = results_original.each{|h| h.delete("id")}
 ScraperWiki.close_sqlite
 
 File.open("results_original.yml", "w") do |f|
