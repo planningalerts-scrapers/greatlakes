@@ -1,10 +1,1 @@
-# Great Lakes Council Scraper
-
-* Server - .NET - ePathway
-* Cookie tracking - No
-* Pagnation - Yes - Limited to 10 pages
-* Javascript - Yes
-* Clearly defined data within a row - Yes
-
-
-Enjoy
+This scraper has been merged in to https://github.com/planningalerts-scrapers/multiple_epathway_scraper
