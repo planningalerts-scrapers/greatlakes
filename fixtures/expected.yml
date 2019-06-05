@@ -153,7 +153,7 @@
   date_scraped: '2019-05-14'
   date_received: '2019-05-27'
 - council_reference: DA-279/2016/A
-  address: 223 The Lakes Way, FORSTER  NSW  2428
+  address: 223 The Lakes Way, FORSTER  NSW  2428, PH FORSTER
   description: Caravan Park
   info_url: https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP
   date_scraped: '2019-05-14'
@@ -327,7 +327,7 @@
   date_scraped: '2019-05-14'
   date_received: '2019-01-11'
 - council_reference: DA-312/2019
-  address: Lot 1 Fullarton Street, THE BRANCH  NSW  2425
+  address: Lot 1 Fullarton Street, THE BRANCH  NSW  2425, HAMILTON
   description: Use existing boat ramp and new jetty
   info_url: https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP
   date_scraped: '2019-05-14'
@@ -1442,7 +1442,7 @@
   date_scraped: '2019-05-14'
   date_received: '2019-05-06'
 - council_reference: DA-484/2019
-  address: 222 The Lakes Way, TUNCURRY  NSW  2428
+  address: 222 The Lakes Way, TUNCURRY  NSW  2428, PH TUNCURRY
   description: Garage
   info_url: https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP
   date_scraped: '2019-05-14'
@@ -1484,7 +1484,7 @@
   date_scraped: '2019-05-14'
   date_received: '2019-01-08'
 - council_reference: DA-490/2019
-  address: 37 The Lakes Way, ELIZABETH BEACH  NSW  2428
+  address: 37 The Lakes Way, ELIZABETH BEACH  NSW  2428, PH FORSTER
   description: Dwelling
   info_url: https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP
   date_scraped: '2019-05-14'
@@ -1742,7 +1742,7 @@
   date_scraped: '2019-05-14'
   date_received: '2019-06-03'
 - council_reference: DA-529/2019
-  address: 223 The Lakes Way, FORSTER  NSW  2428
+  address: 223 The Lakes Way, FORSTER  NSW  2428, PH FORSTER
   description: Additions to caravan park - new clubhouse
   info_url: https://services.greatlakes.nsw.gov.au/ePathway/Production/Web/GeneralEnquiry/EnquiryLists.aspx?ModuleCode=LAP
   date_scraped: '2019-05-14'
